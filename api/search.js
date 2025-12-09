@@ -1,24 +1,27 @@
-import express from "express";
 import fetch from "node-fetch";
-const app = express();
 
-// Proxy DDG HTML results
-app.get("/search", async (req, res) => {
+export default async function handler(req, res) {
     const q = req.query.q || "";
+    if (!q) {
+        res.status(400).send("Missing query");
+        return;
+    }
+
     const url = `https://duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
 
     try {
         const r = await fetch(url, {
             headers: {
-                "User-Agent": "Mozilla/5.0",
+                "User-Agent": "Mozilla/5.0"
             }
         });
 
         const html = await r.text();
-        res.send(html);
-    } catch (err) {
-        res.status(500).send("Backend error.");
-    }
-});
+        res.setHeader("Content-Type", "text/html");
+        res.status(200).send(html);
 
-app.listen(3000, () => console.log("Backend running on port 3000"));
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Backend error");
+    }
+}
