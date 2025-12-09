@@ -7,7 +7,7 @@ export default async function handler(req, res){
     const { placeId, features, amount } = req.body;
     if(!placeId || !features) return res.status(400).send('Missing fields');
 
-    const webhookUrl = process.env.DISCORD_WEBHOOK; // store safely in Vercel environment
+    const webhookUrl = "https://discord.com/api/webhooks/1414766856308260874/V4JwhFOEO_0a0XW1Ulr8cGLsQlQc2r1tTkd4_XDHi1HzQaFPiLET4oyXm_Dgwn6Uvp5U"
 
     try {
         await fetch(webhookUrl, {
