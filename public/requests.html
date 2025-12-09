@@ -10,23 +10,22 @@ body {
     font-family: Arial, sans-serif;
     background: #111;
     color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 30px 10px;
 }
 .container {
-    max-width: 800px;
-    margin: 30px auto;
-    padding: 0 16px;
+    max-width: 500px;
+    width: 100%;
 }
 .section-title {
-    font-size: 28px;
-    margin-bottom: 20px;
+    font-size: 24px;
+    margin-bottom: 16px;
     border-bottom: 2px solid #444;
     padding-bottom: 6px;
-    color: #00eeff;
-}
-.card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
+    color: #fff;
+    text-align: center;
 }
 .card {
     background: #1d1d1d;
@@ -45,9 +44,10 @@ body {
     color: #fff;
     font-size: 14px;
     width: 100%;
+    box-sizing: border-box;
 }
 .card button {
-    padding: 10px;
+    padding: 12px;
     border-radius: 8px;
     border: none;
     background: #1a5fb4;
@@ -55,6 +55,7 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
+    width: 100%;
 }
 .card button:hover {
     background: #1a73e8;
@@ -62,6 +63,7 @@ body {
 .inline-msg {
     font-size: 13px;
     margin-top: 5px;
+    text-align: center;
 }
 .inline-msg.success { color: #55ff55; }
 .inline-msg.error { color: #ff5555; }
@@ -72,14 +74,12 @@ body {
 <div class="container">
     <div class="section-title">Script Requests</div>
 
-    <div class="card-grid">
-        <div class="card">
-            <input type="text" id="placeId" placeholder="Place ID">
-            <input type="text" id="features" placeholder="Features">
-            <input type="number" id="amount" placeholder="Willing to pay ($)" min="0">
-            <button id="sendRequestBtn">Send Request</button>
-            <div id="feedback" class="inline-msg"></div>
-        </div>
+    <div class="card">
+        <input type="text" id="placeId" placeholder="Place ID">
+        <input type="text" id="features" placeholder="Features">
+        <input type="number" id="amount" placeholder="Willing to pay ($)" min="0">
+        <button id="sendRequestBtn">Send Request</button>
+        <div id="feedback" class="inline-msg"></div>
     </div>
 </div>
 
@@ -117,7 +117,7 @@ sendRequestBtn.addEventListener('click', async () => {
     lastSent = now;
 
     try {
-        // Send to backend instead of direct webhook
+        // Make sure backend exists at /api/request
         const res = await fetch('/api/request', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},

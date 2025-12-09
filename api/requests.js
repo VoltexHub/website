@@ -15,7 +15,7 @@ export default async function handler(req, res){
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 embeds: [{
-                    title: 'New Script Request',
+                    title: 'Script Request',
                     color: 0x00eeff,
                     fields: [
                         { name: 'Features', value: features, inline: false },

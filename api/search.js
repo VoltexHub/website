@@ -8,7 +8,6 @@ export default async function handler(req, res) {
   const url = `https://duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
 
   try {
-    // Use native fetch
     const r = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0"
