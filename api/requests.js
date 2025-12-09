@@ -18,7 +18,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Missing fields' });
         }
 
-        const webhookUrl = process.env.DISCORD_WEBHOOK || 
+        const webhookUrl = process.env.weby || 
             "https://discord.com/api/webhooks/1414766856308260874/V4JwhFOEO_0a0XW1Ulr8cGLsQlQc2r1tTkd4_XDHi1HzQaFPiLET4oyXm_Dgwn6Uvp5U";
 
         await fetch(webhookUrl, {
