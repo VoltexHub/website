@@ -5,93 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Script Requests</title>
 <style>
-:root {
-  --bg:#121212;
-  --panel:#1c1c1c;
-  --accent:#4dc3ff;
-  --accent-hover:#66d9ff;
-  --outline:#2c2c2c;
-  --text-soft:#cfdfff;
-}
-* { box-sizing: border-box; }
 body {
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--bg);
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  padding:12px;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
 }
 .container {
-  width:100%;
-  max-width:400px;
-  background:var(--panel);
-  border-radius:10px;
-  padding:16px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.5);
-  border:1px solid var(--outline);
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 0 16px;
 }
-.title {
-  text-align:center;
-  font-size:22px;
-  margin-bottom:12px;
-  color:var(--accent);
+.section-title {
+    font-size: 28px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #444;
+    padding-bottom: 6px;
+    color: #00eeff;
 }
-.panel {
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
 }
-.input-field {
-  padding:8px 10px;
-  border-radius:6px;
-  border:1px solid var(--outline);
-  background:var(--bg);
-  color:#fff;
-  font-size:14px;
+.card {
+    background: #1d1d1d;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
-.input-field:focus {
-  outline:none;
-  border-color:var(--accent);
-  box-shadow:0 0 6px rgba(77,195,255,0.5);
+.card input, .card input[type=number] {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background: #13161c;
+    color: #fff;
+    font-size: 14px;
+    width: 100%;
 }
-.enter-btn {
-  padding:8px;
-  border-radius:6px;
-  border:none;
-  background:var(--accent);
-  color:#fff;
-  font-weight:600;
-  cursor:pointer;
-  transition:all 0.2s;
+.card button {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #1a5fb4;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
 }
-.enter-btn:hover {
-  background:var(--accent-hover);
-  transform:translateY(-1px);
-  box-shadow:0 4px 12px rgba(77,195,255,0.4);
+.card button:hover {
+    background: #1a73e8;
 }
 .inline-msg {
-  font-size:13px;
-  margin-top:4px;
+    font-size: 13px;
+    margin-top: 5px;
 }
-.inline-msg.success { color:#55ff55; }
-.inline-msg.error { color:#ff5555; }
+.inline-msg.success { color: #55ff55; }
+.inline-msg.error { color: #ff5555; }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1 class="title">Script Requests</h1>
-  <div class="panel">
-    <input type="text" class="input-field" id="placeId" placeholder="Place ID">
-    <input type="text" class="input-field" id="features" placeholder="Features">
-    <input type="number" class="input-field" id="amount" placeholder="Amount $" min="0">
-    <button class="enter-btn" id="sendRequestBtn">Send Request</button>
-    <div id="feedback" class="inline-msg"></div>
-  </div>
+    <div class="section-title">Script Requests</div>
+
+    <div class="card-grid">
+        <div class="card">
+            <input type="text" id="placeId" placeholder="Place ID">
+            <input type="text" id="features" placeholder="Features">
+            <input type="number" id="amount" placeholder="Willing to pay ($)" min="0">
+            <button id="sendRequestBtn">Send Request</button>
+            <div id="feedback" class="inline-msg"></div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -102,44 +91,50 @@ const amountInput = document.getElementById('amount');
 const feedback = document.getElementById('feedback');
 
 let lastSent = 0;
-const RateLimit = 5000;
+const RateLimit = 5000; // 5 seconds
 
 function showFeedback(msg,type='success'){
-  feedback.textContent = msg;
-  feedback.className = 'inline-msg ' + (type==='success'?'success':'error');
+    feedback.textContent = msg;
+    feedback.className = 'inline-msg ' + (type==='success'?'success':'error');
 }
 
 sendRequestBtn.addEventListener('click', async () => {
-  const now = Date.now();
-  if (now - lastSent < RateLimit) {
-    showFeedback('Rate limit: wait a few seconds', 'error');
-    return;
-  }
+    const now = Date.now();
+    if(now - lastSent < RateLimit){
+        showFeedback('Rate limit: wait a few seconds', 'error');
+        return;
+    }
 
-  const placeId = placeInput.value.trim();
-  const features = featuresInput.value.trim();
-  const amount = amountInput.value.trim() || '0';
+    const placeId = placeInput.value.trim();
+    const features = featuresInput.value.trim();
+    const amount = amountInput.value.trim() || '0';
 
-  if (!placeId || !features) {
-    showFeedback('Fill Place ID & Features', 'error');
-    return;
-  }
+    if(!placeId || !features){
+        showFeedback('Fill Place ID & Features', 'error');
+        return;
+    }
 
-  lastSent = now;
+    lastSent = now;
 
-  try {
-    // Send to serverless endpoint instead of direct webhook
-    const res = await fetch('/api/request', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ placeId, features, amount })
-    });
-    const data = await res.json();
-    if(res.ok) showFeedback('Request sent!');
-    else showFeedback(data.error || 'Failed to send request', 'error');
-  } catch(err){
-    showFeedback('Failed to send request', 'error');
-  }
+    try {
+        // Send to backend instead of direct webhook
+        const res = await fetch('/api/request', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({placeId, features, amount})
+        });
+
+        if(res.ok){
+            showFeedback('Request sent!', 'success');
+            placeInput.value = '';
+            featuresInput.value = '';
+            amountInput.value = '';
+        } else {
+            showFeedback('Failed to send request', 'error');
+        }
+    } catch(e){
+        showFeedback('Failed to send request', 'error');
+    }
 });
 </script>
 

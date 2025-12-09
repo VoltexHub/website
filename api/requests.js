@@ -1,40 +1,34 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).send({ error: 'Method not allowed' });
-  }
+// /api/request.js
+import fetch from 'node-fetch';
 
-  try {
+export default async function handler(req, res){
+    if(req.method !== 'POST') return res.status(405).send('Method not allowed');
+
     const { placeId, features, amount } = req.body;
+    if(!placeId || !features) return res.status(400).send('Missing fields');
 
-    if (!placeId || !features) {
-      return res.status(400).send({ error: 'Place ID and Features are required' });
+    const webhookUrl = process.env.DISCORD_WEBHOOK; // store safely in Vercel environment
+
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                embeds: [{
+                    title: 'New Script Request',
+                    color: 0x00eeff,
+                    fields: [
+                        { name: 'Features', value: features, inline: false },
+                        { name: 'Place ID', value: placeId, inline: true },
+                        { name: 'Amount', value: amount + '$', inline: true }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
+            })
+        });
+
+        res.status(200).send('OK');
+    } catch(e){
+        res.status(500).send('Backend error');
     }
-
-    // Discord webhook (keep secret here!)
-    const webhookUrl = process.env.DISCORD_WEBHOOK;
-
-    await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        embeds: [
-          {
-            title: "New Request",
-            color: 0x00eeff,
-            fields: [
-              { name: "Features", value: features, inline: false },
-              { name: "Place ID", value: placeId, inline: true },
-              { name: "Amount", value: amount + "$", inline: true }
-            ],
-            timestamp: new Date().toISOString()
-          }
-        ]
-      })
-    });
-
-    res.status(200).send({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({ error: 'Failed to send request' });
-  }
 }
