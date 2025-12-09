@@ -97,8 +97,27 @@
 </head>
 <body>
     <header>
-        <button class="tab-btn active" data-tab="websites">Websites</button>
+        <button class="tab-btn active" data-tab="services">Services</button>
+        <button class="tab-btn" data-tab="websites">Websites</button>
     </header>
+
+    <div id="services" class="section tab active">
+        <div class="section-title">Services</div>
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-title">Anti-Alt ban</div>
+                <img src="assets/service1.png" />
+                
+                <a class="btn" href="assets/files/service1.py">Download</a>
+            </div>
+            <div class="card">
+                <div class="card-title">MAC Address Spoofer</div>
+                <img src="assets/service2.png" />
+                
+                <a class="btn" href="assets/files/service.py">Download</a>
+            </div>
+        </div>
+    </div>
 
     <div id="websites" class="section tab active">
         <div class="section-title">Websites</div>
@@ -140,5 +159,16 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
