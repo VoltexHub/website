@@ -16,16 +16,16 @@ body {
     padding: 30px 10px;
 }
 .container {
-    max-width: 500px;
+    max-width: 480px;
     width: 100%;
 }
 .section-title {
-    font-size: 24px;
-    margin-bottom: 16px;
-    border-bottom: 2px solid #444;
+    font-size: 26px;
+    margin-bottom: 18px;
+    border-bottom: 2px solid #333;
     padding-bottom: 6px;
-    color: #fff;
     text-align: center;
+    color: #fff;
 }
 .card {
     background: #1d1d1d;
@@ -117,12 +117,14 @@ sendRequestBtn.addEventListener('click', async () => {
     lastSent = now;
 
     try {
-        // Make sure backend exists at /api/request
-        const res = await fetch('../api/request', {
+        // Correct endpoint (matches your serverless function)
+        const res = await fetch('/api/requests', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({placeId, features, amount})
         });
+
+        const data = await res.json().catch(()=>({})); // safely parse
 
         if(res.ok){
             showFeedback('Request sent!', 'success');
@@ -130,10 +132,11 @@ sendRequestBtn.addEventListener('click', async () => {
             featuresInput.value = '';
             amountInput.value = '';
         } else {
-            showFeedback('Failed to send request', 'error');
+            showFeedback(data.error || 'Failed to send request', 'error');
         }
     } catch(e){
         showFeedback('Failed to send request', 'error');
+        console.error(e);
     }
 });
 </script>
