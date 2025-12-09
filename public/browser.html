@@ -1,173 +1,123 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Voltex Browser</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
-<style>
-:root {
-    --bg: #111;
-    --panel: #1d1d1d;
-    --accent: #1a5fb4;
-    --accent-hover: #1a73e8;
-    --muted: #bfefff;
-}
-* { box-sizing: border-box; }
-body {
-    margin: 0;
-    font-family: 'Orbitron', sans-serif;
-    background: var(--bg);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    padding: 28px 18px;
-}
-.hero {
-    width: 100%;
-    max-width: 920px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 18px;
-}
-.logo {
-    font-size: 64px;
-    font-weight: 800;
-    color: var(--accent);
-    text-shadow: 0 6px 24px rgba(26,95,180,0.3);
-}
-.searchbox {
-    width: 100%;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-form {
-    display: flex;
-    flex: 1;
-}
-input[type="text"] {
-    flex: 1;
-    padding: 14px 18px;
-    border-radius: 12px;
-    border: 1px solid #333;
-    background: var(--panel);
-    color: #fff;
-    font-size: 16px;
-    outline: none;
-    transition: all 0.2s;
-}
-input[type="text"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 10px rgba(26,95,180,0.4);
-}
-.controls {
-    display: flex;
-    gap: 8px;
-    margin-left: 6px;
-}
-button {
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: none;
-    background: var(--accent);
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-button:hover {
-    background: var(--accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(26,95,180,0.3);
-}
-.frame-wrap {
-    width: 100%;
-    max-width: 920px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-iframe {
-    flex: 1;
-    border-radius: 12px;
-    min-height: 420px;
-    border: 1px solid #333;
-    background: #fff;
-}
-.note {
-    color: var(--muted);
-    font-size: 13px;
-    text-align: center;
-}
-@media (max-width:720px){
-    .logo { font-size: 44px; }
-    .frame-wrap { min-height: 300px; }
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Search</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0e0e0e;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 80px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #e5e5e5;
+        }
+
+        #searchBox {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        #searchBtn {
+            margin-top: 18px;
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            background: #333;
+            color: white;
+            cursor: pointer;
+        }
+
+        #searchBtn:hover {
+            background: #444;
+        }
+
+        #results {
+            margin-top: 40px;
+        }
+
+        .result-item {
+            padding: 15px;
+            border-bottom: 1px solid #222;
+        }
+
+        .result-title {
+            color: #66aaff;
+            font-size: 1.1rem;
+        }
+
+        .result-snippet {
+            margin-top: 6px;
+            color: #cfcfcf;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
-<div class="hero">
-    <div class="logo">Voltex</div>
 
-    <div class="searchbox">
-        <form id="searchForm" onsubmit="doSearch(event)">
-            <input id="q" type="text" placeholder="Search Google or type a URL" autocomplete="off" />
-        </form>
-        <div class="controls">
-            <button id="goBtn" onclick="doSearch()">Search</button>
-            <button id="openBtn" onclick="openNewTab()">Open in new tab</button>
-        </div>
-    </div>
+<div class="container">
+    <h1>Search</h1>
 
-    <div class="note">Tip: if a site blocks embedding, use "Open in new tab".</div>
-</div>
+    <input id="searchBox" type="text" placeholder="Search anything...">
 
-<div class="frame-wrap">
-    <iframe id="view" src="about:blank" sandbox="allow-scripts allow-forms allow-popups"></iframe>
+    <button id="searchBtn">Search</button>
+
+    <div id="results"></div>
 </div>
 
 <script>
-const input = document.getElementById('q');
-const iframe = document.getElementById('view');
-
-function normalizeQuery(raw){
-    const s = String(raw).trim();
-    if (!s) return '';
-
-    if (s.indexOf('.') !== -1 && !s.includes(' ')){
-        if (s.startsWith('http://') || s.startsWith('https://')) return s;
-        return 'https://' + s;
-    }
-    return 'https://www.google.com/search?q=' + encodeURIComponent(s);
-}
-
-function doSearch(e){
-    if (e && e.preventDefault) e.preventDefault();
-    const q = input.value;
+document.getElementById("searchBtn").addEventListener("click", async () => {
+    const q = document.getElementById("searchBox").value.trim();
     if (!q) return;
-    iframe.src = normalizeQuery(q);
-}
 
-function openNewTab(){
-    const q = input.value;
-    if (!q) return;
-    window.open(normalizeQuery(q), '_blank');
-}
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "Searching...";
 
-input.addEventListener('keydown', (e)=>{
-    if (e.key === 'Enter'){
-        e.preventDefault();
-        doSearch();
+    try {
+        const res = await fetch(`/search?q=` + encodeURIComponent(q));
+        if (!res.ok) throw new Error("Backend error");
+
+        const data = await res.json(); // expecting: { results: [ {title, link, snippet} ] }
+        
+        resultsDiv.innerHTML = "";
+
+        data.results.forEach(r => {
+            const div = document.createElement("div");
+            div.className = "result-item";
+            div.innerHTML = `
+                <a class="result-title" href="${r.link}" target="_blank">${r.title}</a>
+                <div class="result-snippet">${r.snippet}</div>
+            `;
+            resultsDiv.appendChild(div);
+        });
+
+        if (data.results.length === 0) {
+            resultsDiv.innerHTML = "No results found.";
+        }
+
+    } catch (err) {
+        resultsDiv.innerHTML = "Failed to load search results.";
     }
 });
-
-iframe.src = 'https://www.google.com/search?q=voltex';
 </script>
+
 </body>
 </html>
