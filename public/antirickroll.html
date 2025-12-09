@@ -10,49 +10,19 @@ body {
     font-family: Arial, sans-serif;
     background: #111;
     color: #fff;
-}
-header {
-    padding: 20px;
+    padding: 40px 20px;
     display: flex;
     justify-content: center;
-    gap: 10px;
-    background: #1a1a1a;
-    font-size: 20px;
-    font-weight: bold;
-}
-.tab-btn {
-    padding: 10px 20px;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    color: #fff;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.tab-btn:hover {
-    background: #222;
-}
-.tab-btn.active {
-    background: #1a5fb4;
-    border-color: #1a73e8;
 }
 .section {
-    padding: 40px;
-    max-width: 800px;
-    margin: auto;
-}
-.section-title {
-    font-size: 32px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #444;
-    padding-bottom: 10px;
+    max-width: 600px;
+    width: 100%;
 }
 .card {
     background: #1d1d1d;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0,0,0,0.4);
-    margin-bottom: 20px;
 }
 .input-field {
     width: 100%;
@@ -62,7 +32,7 @@ header {
     background: #1a1a1a;
     color: #fff;
     font-size: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 .input-field:focus {
     outline: none;
@@ -94,12 +64,7 @@ header {
 </style>
 </head>
 <body>
-<header>
-    <button class="tab-btn active" data-tab="scanner">Rickroll Scanner</button>
-</header>
-
-<div id="scanner" class="section tab active">
-    <div class="section-title">Rickroll Scanner</div>
+<div class="section">
     <div class="card">
         <input type="text" class="input-field" id="urlInput" placeholder="Enter URL to scan">
         <button class="enter-btn" id="scanBtn">Scan</button>
