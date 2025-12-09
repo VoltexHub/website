@@ -5,92 +5,106 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rickroll Scanner</title>
 <style>
-/* Global Styles */
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-body{background:#111;color:#fff;min-height:100vh;padding:40px 20px;display:flex;justify-content:center;align-items:flex-start;}
-.container{width:100%;max-width:600px;}
-
-/* Card Layout */
-.card{
-    background:#1d1d1d;
-    border-radius:12px;
-    padding:30px;
-    box-shadow:0 0 15px rgba(0,0,0,0.5);
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
 }
-
-/* Title */
-.title{
-    text-align:center;
-    font-size:32px;
-    margin-bottom:20px;
-    color:#1a5fb4;
-    border-bottom:2px solid #444;
-    padding-bottom:10px;
+header {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    background: #1a1a1a;
+    font-size: 20px;
+    font-weight: bold;
 }
-
-/* Panel */
-.panel{display:flex;flex-direction:column;gap:20px;}
-
-/* Input Field */
-.input-field{
-    padding:12px 15px;
-    border-radius:8px;
-    border:1px solid #333;
-    background:#1a1a1a;
-    color:#fff;
-    font-size:16px;
-    transition:0.2s;
+.tab-btn {
+    padding: 10px 20px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.2s;
 }
-.input-field:focus{
-    outline:none;
-    border-color:#1a73e8;
-    box-shadow:0 0 10px rgba(26,95,180,0.4);
+.tab-btn:hover {
+    background: #222;
 }
-
-/* Button */
-.enter-btn{
-    padding:12px;
-    border-radius:8px;
-    border:none;
-    background:#1a5fb4;
-    color:#fff;
-    font-weight:bold;
-    cursor:pointer;
-    transition:all 0.3s;
+.tab-btn.active {
+    background: #1a5fb4;
+    border-color: #1a73e8;
 }
-.enter-btn:hover{
-    background:#1a73e8;
-    transform:translateY(-2px);
-    box-shadow:0 5px 15px rgba(26,95,180,0.5);
+.section {
+    padding: 40px;
+    max-width: 800px;
+    margin: auto;
 }
-
-/* Feedback Messages */
-.inline-msg{
-    font-size:15px;
+.section-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #444;
+    padding-bottom: 10px;
 }
-.inline-msg.success{color:#55ff55;}
-.inline-msg.error{color:#ff5555;}
-
-/* Result Box */
-#result{
-    margin-top:10px;
-    padding:10px;
-    border-radius:6px;
-    background:#1a1a1a;
-    border:1px solid #333;
+.card {
+    background: #1d1d1d;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    margin-bottom: 20px;
 }
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+.input-field:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 10px rgba(26,95,180,0.5);
+}
+.enter-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: #1a5fb4;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.enter-btn:hover {
+    background: #1a73e8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(26,95,180,0.5);
+}
+.inline-msg {
+    font-size: 15px;
+    margin-top: 10px;
+}
+.inline-msg.success { color: #55ff55; }
+.inline-msg.error { color: #ff5555; }
 </style>
 </head>
 <body>
-<div class="container">
+<header>
+    <button class="tab-btn active" data-tab="scanner">Rickroll Scanner</button>
+</header>
+
+<div id="scanner" class="section tab active">
+    <div class="section-title">Rickroll Scanner</div>
     <div class="card">
-        <div class="title">Rickroll Scanner</div>
-        <div class="panel">
-            <input type="text" class="input-field" id="urlInput" placeholder="Enter URL to scan">
-            <button class="enter-btn" id="scanBtn">Scan</button>
-            <div id="feedback" class="inline-msg"></div>
-            <div id="result" class="inline-msg"></div>
-        </div>
+        <input type="text" class="input-field" id="urlInput" placeholder="Enter URL to scan">
+        <button class="enter-btn" id="scanBtn">Scan</button>
+        <div id="feedback" class="inline-msg"></div>
+        <div id="result" class="inline-msg"></div>
     </div>
 </div>
 
@@ -104,55 +118,54 @@ const rickSigns = ["rick astley","never gonna give you up","rick roll"];
 const CORS_PROXY = "https://api.allorigins.win/get?url=";
 
 function showFeedback(msg,type='success'){
-  feedback.textContent = msg;
-  feedback.className = 'inline-msg ' + (type==='success'?'success':'error');
+    feedback.textContent = msg;
+    feedback.className = 'inline-msg ' + (type==='success'?'success':'error');
 }
-
 function showResult(msg){
-  result.textContent = msg;
+    result.textContent = msg;
 }
 
 async function scanURL(url){
-  try{
-    showFeedback("Scanning...");
-    result.textContent = "";
+    try{
+        showFeedback("Scanning...");
+        result.textContent = "";
+        let fetchUrl = url;
+        let useProxy = false;
+        try {
+            const response = await fetch(url);
+            if(!response.ok) throw new Error("Direct fetch failed");
+            const text = await response.text();
+            const found = rickSigns.some(sign => text.toLowerCase().includes(sign));
+            showResult(found ? "Rickroll detected" : "Safe");
+            showFeedback("Scan complete", "success");
+            return;
+        } catch(e) {
+            useProxy = true;
+        }
 
-    let fetchUrl = url;
-    if(!url.startsWith(window.location.origin)){
-      fetchUrl = CORS_PROXY + encodeURIComponent(url);
-    }
+        if(useProxy){
+            const response = await fetch(CORS_PROXY + encodeURIComponent(url));
+            const data = await response.json();
+            const text = data.contents;
+            const found = rickSigns.some(sign => text.toLowerCase().includes(sign));
+            showResult(found ? "Rickroll detected" : "Safe");
+            showFeedback("Scan complete", "success");
+        }
 
-    const response = await fetch(fetchUrl);
-    let text = "";
-    if(fetchUrl.startsWith(CORS_PROXY)){
-      const data = await response.json();
-      text = data.contents;
-    } else {
-      text = await response.text();
+    } catch(e){
+        showFeedback("Failed to fetch URL", "error");
+        result.textContent = "";
     }
-
-    const found = rickSigns.some(sign => text.toLowerCase().includes(sign));
-    if(found){
-      showResult("Scan complete: Rickroll detected");
-      showFeedback("Scan complete", "success");
-    } else {
-      showResult("Scan complete: Safe");
-      showFeedback("Scan complete", "success");
-    }
-  } catch(e){
-    showFeedback("Failed to fetch URL", "error");
-    result.textContent = "";
-  }
 }
 
 scanBtn.addEventListener('click', () => {
-  const url = urlInput.value.trim();
-  if(!url){
-    showFeedback("Enter a URL", "error");
-    result.textContent = "";
-    return;
-  }
-  scanURL(url);
+    const url = urlInput.value.trim();
+    if(!url){
+        showFeedback("Enter a URL", "error");
+        result.textContent = "";
+        return;
+    }
+    scanURL(url);
 });
 </script>
 </body>
