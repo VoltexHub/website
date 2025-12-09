@@ -66,7 +66,7 @@ body {
 <body>
 <div class="section">
     <div class="card">
-        <input type="text" class="input-field" id="urlInput" placeholder="Enter URL to scan">
+        <input type="text" class="input-field" id="urlInput" placeholder="Url" />
         <button class="enter-btn" id="scanBtn">Scan</button>
         <div id="feedback" class="inline-msg"></div>
         <div id="result" class="inline-msg"></div>
@@ -79,8 +79,8 @@ const urlInput = document.getElementById('urlInput');
 const feedback = document.getElementById('feedback');
 const result = document.getElementById('result');
 
-const rickSigns = ["rick astley","never gonna give you up","rick roll"];
-const CORS_PROXY = "https://api.allorigins.win/get?url=";
+const check = ["rick astley","never gonna give you up","rick roll"];
+const api = "https://api.allorigins.win/get?url=";
 
 function showFeedback(msg,type='success'){
     feedback.textContent = msg;
@@ -100,7 +100,7 @@ async function scanURL(url){
             const response = await fetch(url);
             if(!response.ok) throw new Error("Direct fetch failed");
             const text = await response.text();
-            const found = rickSigns.some(sign => text.toLowerCase().includes(sign));
+            const found = check.some(sign => text.toLowerCase().includes(sign));
             showResult(found ? "Rickroll detected" : "Safe");
             showFeedback("Scan complete", "success");
             return;
@@ -109,10 +109,10 @@ async function scanURL(url){
         }
 
         if(useProxy){
-            const response = await fetch(CORS_PROXY + encodeURIComponent(url));
+            const response = await fetch(api + encodeURIComponent(url));
             const data = await response.json();
             const text = data.contents;
-            const found = rickSigns.some(sign => text.toLowerCase().includes(sign));
+            const found = check.some(sign => text.toLowerCase().includes(sign));
             showResult(found ? "Rickroll detected" : "Safe");
             showFeedback("Scan complete", "success");
         }
