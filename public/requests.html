@@ -6,75 +6,76 @@
 <title>Script Requests</title>
 <style>
 :root {
-  --bg:#0c0e11;
-  --panel:#13161c;
-  --accent:#1a5fb4;
-  --accent-hover:#1a73e8;
-  --outline:#2a2e38;
-  --text-soft:#d4eaff;
+  --bg:#121212;
+  --panel:#1c1c1c;
+  --accent:#4dc3ff;
+  --accent-hover:#66d9ff;
+  --outline:#2c2c2c;
+  --text-soft:#cfdfff;
 }
 * { box-sizing: border-box; }
 body {
-  margin:0; font-family:Arial,sans-serif;
-  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
   color:#fff;
-  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:20px;
+  min-height:100vh;
+  padding:12px;
 }
 .container {
-  width:100%; max-width:500px;
-  background:rgba(25,25,48,0.9);
-  border-radius:12px;
-  padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  width:100%;
+  max-width:400px;
+  background:var(--panel);
+  border-radius:10px;
+  padding:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.5);
   border:1px solid var(--outline);
 }
 .title {
   text-align:center;
-  font-size:28px;
-  margin-bottom:20px;
+  font-size:22px;
+  margin-bottom:12px;
   color:var(--accent);
-  text-shadow:0 0 10px rgba(26,95,180,0.5);
 }
 .panel {
   display:flex;
   flex-direction:column;
-  gap:15px;
+  gap:8px;
 }
 .input-field {
-  padding:12px 15px;
+  padding:8px 10px;
   border-radius:6px;
-  border:2px solid var(--outline);
-  background:var(--panel);
+  border:1px solid var(--outline);
+  background:var(--bg);
   color:#fff;
-  font-size:16px;
+  font-size:14px;
 }
 .input-field:focus {
   outline:none;
   border-color:var(--accent);
-  box-shadow:0 0 10px rgba(26,95,180,0.5);
+  box-shadow:0 0 6px rgba(77,195,255,0.5);
 }
 .enter-btn {
-  padding:12px;
+  padding:8px;
   border-radius:6px;
   border:none;
   background:var(--accent);
-  color:white;
-  font-weight:bold;
+  color:#fff;
+  font-weight:600;
   cursor:pointer;
-  transition:all 0.3s;
+  transition:all 0.2s;
 }
 .enter-btn:hover {
   background:var(--accent-hover);
-  transform:translateY(-2px);
-  box-shadow:0 5px 15px rgba(26,95,180,0.4);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(77,195,255,0.4);
 }
 .inline-msg {
-  margin-top:5px;
-  font-size:14px;
+  font-size:13px;
+  margin-top:4px;
 }
 .inline-msg.success { color:#55ff55; }
 .inline-msg.error { color:#ff5555; }
@@ -84,7 +85,6 @@ body {
 
 <div class="container">
   <h1 class="title">Script Requests</h1>
-
   <div class="panel">
     <input type="text" class="input-field" id="placeId" placeholder="Place ID">
     <input type="text" class="input-field" id="features" placeholder="Features">
@@ -102,7 +102,7 @@ const amountInput = document.getElementById('amount');
 const feedback = document.getElementById('feedback');
 
 let lastSent = 0;
-const RateLimit = 5000; // 5s
+const RateLimit = 5000;
 
 function showFeedback(msg,type='success'){
   feedback.textContent = msg;
@@ -128,17 +128,16 @@ sendRequestBtn.addEventListener('click', async () => {
   lastSent = now;
 
   try {
+    // Send to serverless endpoint instead of direct webhook
     const res = await fetch('/api/request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ placeId, features, amount })
     });
-
     const data = await res.json();
-    if (res.ok) showFeedback('Request sent!');
+    if(res.ok) showFeedback('Request sent!');
     else showFeedback(data.error || 'Failed to send request', 'error');
-
-  } catch (err) {
+  } catch(err){
     showFeedback('Failed to send request', 'error');
   }
 });
