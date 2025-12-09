@@ -91,7 +91,7 @@ const amountInput = document.getElementById('amount');
 const feedback = document.getElementById('feedback');
 
 let lastSent = 0;
-const RateLimit = 5000; // 5 seconds
+const RateLimit = 5000;
 
 function showFeedback(msg,type='success'){
     feedback.textContent = msg;
@@ -101,7 +101,7 @@ function showFeedback(msg,type='success'){
 sendRequestBtn.addEventListener('click', async () => {
     const now = Date.now();
     if(now - lastSent < RateLimit){
-        showFeedback('Rate limit: wait a few seconds', 'error');
+        showFeedback('Wait a few seconds', 'error');
         return;
     }
 
@@ -110,7 +110,7 @@ sendRequestBtn.addEventListener('click', async () => {
     const amount = amountInput.value.trim() || '0';
 
     if(!placeId || !features){
-        showFeedback('Fill Place ID & Features', 'error');
+        showFeedback('Forgot to fill some items', 'error');
         return;
     }
 
