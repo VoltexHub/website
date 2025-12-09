@@ -90,38 +90,25 @@ function showResult(msg){
     result.textContent = msg;
 }
 
-async function scanURL(url){
+async function scan(url){
     try{
         showFeedback("Scanning...");
         result.textContent = "";
-        let fetchUrl = url;
-        let useProxy = false;
-        try {
-            const response = await fetch(url);
-            if(!response.ok) throw new Error("Direct fetch failed");
-            const text = await response.text();
-            const found = check.some(sign => text.toLowerCase().includes(sign));
-            showResult(found ? "Rickroll detected" : "Safe");
-            showFeedback("Scan complete", "success");
-            return;
-        } catch(e) {
-            useProxy = true;
-        }
 
-        if(useProxy){
-            const response = await fetch(api + encodeURIComponent(url));
-            const data = await response.json();
-            const text = data.contents;
-            const found = check.some(sign => text.toLowerCase().includes(sign));
-            showResult(found ? "Rickroll detected" : "Safe");
-            showFeedback("Scan complete", "success");
-        }
+        const response = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url));
+        const data = await response.json();
+        const text = data.contents.toLowerCase();
+
+        const found = check.some(sign => text.includes(sign));
+        showResult(found ? "Rickroll detected" : "Safe");
+        showFeedback("Scan complete", "success");
 
     } catch(e){
         showFeedback("Failed to fetch URL", "error");
         result.textContent = "";
     }
 }
+
 
 scanBtn.addEventListener('click', () => {
     const url = urlInput.value.trim();
@@ -130,7 +117,7 @@ scanBtn.addEventListener('click', () => {
         result.textContent = "";
         return;
     }
-    scanURL(url);
+    scan(url);
 });
 </script>
 </body>
