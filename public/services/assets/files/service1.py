@@ -38,7 +38,7 @@ def clear_website():
             except:
                 pass
 
-    print("Website cleared")
+    print("\nWebsite cleared")
 
 def clear_app():
     subprocess.run(['taskkill', '/F', '/IM', 'RobloxPlayerBeta.exe'],
@@ -98,4 +98,4 @@ if __name__ == "__main__":
     clear_app() # couldnt implement the re-launching of the app
     spoof_mac()
 
-    print("Complete, but you should probbaly use a vpn too")
+    print("\nComplete, but you should probbaly use a vpn")
