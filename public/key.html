@@ -2,81 +2,68 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Key Generator</title>
+<title>Your Key</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
     body {
-        background: #121212;
-        color: white;
+        background: #111;
+        color: #fff;
         font-family: Arial, sans-serif;
+        margin: 0;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        margin: 0;
+        text-align: center;
     }
-
     .box {
+        background: #1b1b1b;
+        padding: 25px;
+        border-radius: 12px;
         width: 90%;
         max-width: 420px;
-        background: #1e1e1e;
-        padding: 25px;
-        border-radius: 14px;
-        text-align: center;
-        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
-
-    button {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        background: #3b3b3b;
-        color: white;
-        font-size: 16px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: .2s;
-    }
-
-    button:hover {
-        background: #505050;
-    }
-
-    #output {
+    #key {
         margin-top: 15px;
         word-wrap: break-word;
-        font-size: 16px;
+        font-size: 18px;
+        color: #58a6ff;
     }
 </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Generate Your Key</h2>
-    <button id="generate">Generate Key</button>
-    <div id="output"></div>
+    <h2>Your Key</h2>
+    <div id="msg">Generating key…</div>
+    <div id="key"></div>
 </div>
 
 <script>
 
 const supaUrl = "https://qtjachuaokzavkwrvlgg.supabase.co";
 const anon = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0amFjaHVhb2t6YXZrd3J2bGdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTI1MjksImV4cCI6MjA4MDk2ODUyOX0.4CfITIjbMieONpitn-FKYBzQhQTHGdu8XsUKc3Na8Rg";
-const ab = "548c69cd30c4f43ed1e32e50d0da1f328aab7175744caec39fa0d4a295f72155";
+const ab  = "548c69cd30c4f43ed1e32e50d0da1f328aab7175744caec39fa0d4a295f72155";
 
-async function createKey() {
+function generateKey() {
+    return (
+        crypto.randomUUID().replace(/-/g, "") +
+        Math.random().toString(36).slice(2, 12)
+    );
+}
 
-    const key = crypto.randomUUID().replace(/-/g, "") +
-                Math.random().toString(36).substring(2, 12);
-
-    const expires = new Date(Date.now() + 86400000).toISOString(); // +24h
+async function sendToSupabase(key) {
+    const expires = new Date(Date.now() + 86400000).toISOString();
 
     const res = await fetch(supaUrl + "/rest/v1/keys", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "apikey": anon,
-            "Authorization": "Bearer " + anon
+            "Authorization": "Bearer " + anon,
+            "Prefer": "return=minimal"
         },
         body: JSON.stringify({
             key: key,
@@ -85,23 +72,25 @@ async function createKey() {
         })
     });
 
-    if (!res.ok) throw new Error("Supabase insert failed");
-
-    return key;
+    return res.ok;
 }
 
-document.getElementById("generate").onclick = async () => {
-    const out = document.getElementById("output");
-    out.innerHTML = "Generating...";
+(async () => {
+    const msg = document.getElementById("msg");
+    const keyBox = document.getElementById("key");
 
-    try {
-        const key = await createKey();
-        out.innerHTML = "Your Key:<br><b>" + key + "</b>";
-    } catch (err) {
-        out.innerHTML = "Error: Could not generate key.";
+    const key = generateKey();
+    const ok = await sendToSupabase(key);
+
+    if (ok) {
+        msg.innerHTML = "Your key:";
+        keyBox.innerHTML = key;
+    } else {
+        msg.innerHTML = "Failed to generate key.";
+        keyBox.innerHTML = "";
     }
-};
-
+})();
 </script>
+
 </body>
 </html>
