@@ -3,74 +3,72 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Create Key</title>
+  <title>Generating Key...</title>
   <style>
-    body { background:#111;color:#eee;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh }
-    .box { width:320px;background:#1d1d1d;padding:20px;border-radius:12px }
-    input,button { width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none }
-    input { background:#111;color:#eee;border:1px solid #333 }
-    button { background:#333;color:#fff;cursor:pointer }
-    button:hover { background:#444 }
+    body { background:#0d0d0d; color:#eee; font-family:Arial; display:flex; justify-content:center; align-items:center; height:100vh; }
+    #box { background:#1a1a1a; padding:20px; border-radius:10px; width:320px; text-align:center; }
   </style>
 </head>
 <body>
 
-<div class="box">
-  <h3>Create Key</h3>
-
-  <input id="userid" type="number" placeholder="Roblox UserId">
-  <button onclick="createKey()">Generate Key</button>
-
-  <p id="status"></p>
+<div id="box">
+  <h3>Generating your key...</h3>
+  <p id="msg">Please wait</p>
 </div>
 
 <script>
 
-function randomKey() {
-  const chars = "abcdef0123456789";
-  let out = "";
-  for (let i = 0; i < 32; i++) out += chars[Math.floor(Math.random()*chars.length)];
-  return out;
+// Extract ?uid=NUMBER
+const params = new URLSearchParams(window.location.search);
+const uid = params.get("uid");
+
+if (!uid) {
+    document.getElementById("msg").textContent = "UserId missing (uid= not provided)";
+    throw new Error("Missing uid");
 }
 
-const supaUrl = "https://qtjachuaokzavkwrvlgg.supabase.co";
-const anon = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0amFjaHVhb2t6YXZrd3J2bGdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTI1MjksImV4cCI6MjA4MDk2ODUyOX0.4CfITIjbMieONpitn-FKYBzQhQTHGdu8XsUKc3Na8Rg";
-const ab = "548c69cd30c4f43ed1e32e50d0da1f328aab7175744caec39fa0d4a295f72155";
-
-async function createKey() {
-  const userid = document.getElementById("userid").value.trim();
-  const status = document.getElementById("status");
-
-  if (!userid) {
-    status.textContent = "User ID required.";
-    return;
-  }
-
-  const key = randomKey();
-
-  const body = [{
-    user_id: Number(userid),
-    key: key
-  }];
-
-  const res = await fetch(`${supaUrl}/rest/v1/keys`, {
-    method: "POST",
-    headers: {
-      "apikey": anon,
-      "Authorization": `Bearer ${anon}`,
-      "Content-Type": "application/json",
-      "Prefer": "return=representation",
-      "X-Anti-Bypass-Token": ab
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (res.ok) {
-    status.textContent = "Key created: " + key;
-  } else {
-    status.textContent = "Failed";
-  }
+// Generate 32-char hex key
+function makeKey() {
+    const chars = "abcdef0123456789";
+    let out = "";
+    for (let i = 0; i < 32; i++) out += chars[Math.floor(Math.random()*chars.length)];
+    return out;
 }
+
+const key = makeKey();
+
+(async () => {
+
+    const res = await fetch(
+        "https://qtjachuaokzavkwrvlgg.supabase.co/rest/v1/keys",
+        {
+            method: "POST",
+            headers: {
+                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0amFjaHVhb2t6YXZrd3J2bGdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTI1MjksImV4cCI6MjA4MDk2ODUyOX0.4CfITIjbMieONpitn-FKYBzQhQTHGdu8XsUKc3Na8Rg",
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0amFjaHVhb2t6YXZrd3J2bGdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTI1MjksImV4cCI6MjA4MDk2ODUyOX0.4CfITIjbMieONpitn-FKYBzQhQTHGdu8XsUKc3Na8Rg",
+                "Content-Type": "application/json",
+                "Prefer": "return=representation",
+                "X-Linkvertise-Bypass": "548c69cd30c4f43ed1e32e50d0da1f328aab7175744caec39fa0d4a295f72155"
+            },
+            body: JSON.stringify([
+                {
+                    user_id: Number(uid),
+                    key: key
+                }
+            ])
+        }
+    );
+
+    if (res.ok) {
+        document.getElementById("msg").textContent =
+            "Success! Key generated: " + key;
+    } else {
+        document.getElementById("msg").textContent =
+            "Failed to create key (RLS probably blocking)";
+    }
+
+})();
 </script>
+
 </body>
 </html>
