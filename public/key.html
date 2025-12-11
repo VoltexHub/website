@@ -1,74 +1,107 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Generating Key...</title>
-  <style>
-    body { background:#0d0d0d; color:#eee; font-family:Arial; display:flex; justify-content:center; align-items:center; height:100vh; }
-    #box { background:#1a1a1a; padding:20px; border-radius:10px; width:320px; text-align:center; }
-  </style>
+<meta charset="UTF-8">
+<title>Key Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        background: #121212;
+        color: white;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .box {
+        width: 90%;
+        max-width: 420px;
+        background: #1e1e1e;
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        background: #3b3b3b;
+        color: white;
+        font-size: 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    button:hover {
+        background: #505050;
+    }
+
+    #output {
+        margin-top: 15px;
+        word-wrap: break-word;
+        font-size: 16px;
+    }
+</style>
 </head>
 <body>
 
-<div id="box">
-  <h3>Generating your key...</h3>
-  <p id="msg">Please wait</p>
+<div class="box">
+    <h2>Generate Your Key</h2>
+    <button id="generate">Generate Key</button>
+    <div id="output"></div>
 </div>
 
 <script>
 
-// Extract ?uid=NUMBER
-const params = new URLSearchParams(window.location.search);
-const uid = params.get("uid");
+const supaUrl = "https://qtjachuaokzavkwrvlgg.supabase.co";
+const anon = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0amFjaHVhb2t6YXZrd3J2bGdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTI1MjksImV4cCI6MjA4MDk2ODUyOX0.4CfITIjbMieONpitn-FKYBzQhQTHGdu8XsUKc3Na8Rg";
+const ab = "548c69cd30c4f43ed1e32e50d0da1f328aab7175744caec39fa0d4a295f72155";
 
-if (!uid) {
-    document.getElementById("msg").textContent = "UserId missing (uid= not provided)";
-    throw new Error("Missing uid");
+async function createKey() {
+
+    const key = crypto.randomUUID().replace(/-/g, "") +
+                Math.random().toString(36).substring(2, 12);
+
+    const expires = new Date(Date.now() + 86400000).toISOString(); // +24h
+
+    const res = await fetch(supaUrl + "/rest/v1/keys", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "apikey": anon,
+            "Authorization": "Bearer " + anon
+        },
+        body: JSON.stringify({
+            key: key,
+            ab_token: ab,
+            expires_at: expires
+        })
+    });
+
+    if (!res.ok) throw new Error("Supabase insert failed");
+
+    return key;
 }
 
-// Generate 32-char hex key
-function makeKey() {
-    const chars = "abcdef0123456789";
-    let out = "";
-    for (let i = 0; i < 32; i++) out += chars[Math.floor(Math.random()*chars.length)];
-    return out;
-}
+document.getElementById("generate").onclick = async () => {
+    const out = document.getElementById("output");
+    out.innerHTML = "Generating...";
 
-const key = makeKey();
-
-(async () => {
-
-    const res = await fetch(
-        "https://qtjachuaokzavkwrvlgg.supabase.co/rest/v1/keys",
-        {
-            method: "POST",
-            headers: {
-                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0amFjaHVhb2t6YXZrd3J2bGdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTI1MjksImV4cCI6MjA4MDk2ODUyOX0.4CfITIjbMieONpitn-FKYBzQhQTHGdu8XsUKc3Na8Rg",
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0amFjaHVhb2t6YXZrd3J2bGdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzOTI1MjksImV4cCI6MjA4MDk2ODUyOX0.4CfITIjbMieONpitn-FKYBzQhQTHGdu8XsUKc3Na8Rg",
-                "Content-Type": "application/json",
-                "Prefer": "return=representation",
-                "X-Linkvertise-Bypass": "548c69cd30c4f43ed1e32e50d0da1f328aab7175744caec39fa0d4a295f72155"
-            },
-            body: JSON.stringify([
-                {
-                    user_id: Number(uid),
-                    key: key
-                }
-            ])
-        }
-    );
-
-    if (res.ok) {
-        document.getElementById("msg").textContent =
-            "Success! Key generated: " + key;
-    } else {
-        document.getElementById("msg").textContent =
-            "Failed to create key (RLS probably blocking)";
+    try {
+        const key = await createKey();
+        out.innerHTML = "Your Key:<br><b>" + key + "</b>";
+    } catch (err) {
+        out.innerHTML = "Error: Could not generate key.";
     }
+};
 
-})();
 </script>
-
 </body>
 </html>
