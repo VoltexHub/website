@@ -1,56 +1,74 @@
 import subprocess
 import random
+import sys
+import ctypes
+import re
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
 
 def random_mac():
-    pairs = [f"{random.randint(0, 255):02X}" for _ in range(6)]
-    first = int(pairs[0], 16)
-    first |= 2  # locally administered
-    first &= 0xFE # unicast
-    pairs[0] = f"{first:02X}"
-    return "-".join(pairs)
+    mac = [random.randint(0x00, 0xFF) for _ in range(6)]
+    mac[0] = (mac[0] | 2) & 0xFE  # locally administered + unicast
+    return "-".join(f"{b:02X}" for b in mac)
 
 def get_adapter():
-    result = subprocess.run(["netsh", "interface", "show", "interface"],
-                            capture_output=True, text=True)
+    result = subprocess.run(
+        ["netsh", "interface", "show", "interface"],
+        capture_output=True, text=True
+    )
     for line in result.stdout.splitlines():
         if "Connected" in line and "Enabled" in line:
-            parts = line.split()
-            return parts[-1]
+            return line.split()[-1]
     return None
+
+def valid_mac(mac):
+    return bool(re.fullmatch(r"[0-9A-F]{2}(-[0-9A-F]{2}){5}", mac))
 
 def spoof_mac(new_mac):
     adapter = get_adapter()
-    if adapter is None:
-        print("Could not find an active network adapter.")
+    if not adapter:
+        print("No active network adapter found.")
         return
 
-    adapter_key = r"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}"
+    base_key = r"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}"
 
-    for i in range(0, 50):
-        key = adapter_key + f"\\{i:04d}"
-        subprocess.run(["reg", "add", key, "/v", "NetworkAddress", "/d", new_mac, "/f"],
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for i in range(50):
+        key = f"{base_key}\\{i:04d}"
+        subprocess.run(
+            ["reg", "add", key, "/v", "NetworkAddress", "/d", new_mac.replace("-", ""), "/f"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
 
-    subprocess.run(["netsh", "interface", "set", "interface", f"name={adapter}", "admin=disabled"],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run(["netsh", "interface", "set", "interface", f"name={adapter}", "admin=enabled"],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["netsh", "interface", "set", "interface", adapter, "admin=disabled"],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["netsh", "interface", "set", "interface", adapter, "admin=enabled"],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    print(f"Mad address successfully changed to: {new_mac}")
+    print(f"MAC address set to: {new_mac}")
+    print("Reconnect to Wi‑Fi/Ethernet if needed.")
 
 def main():
-    mode = input("Custom mac address or random? (custom/random): ").strip().lower()
-    if mode == "custom":
-        custom_mac = input("Enter custom mac format: XX-XX-XX-XX-XX-XX): ").strip().upper()
-        if len(custom_mac) != 17 or any(c not in "0123456789ABCDEF-" for c in custom_mac):
-            print("Invalid format, defaulting to random address")
-            new_mac = random_mac()
-        else:
-            new_mac = custom_mac
-    else:
-        new_mac = random_mac()
+    if not is_admin():
+        print("Run this script as Administrator.")
+        input("Press Enter to exit...")
+        sys.exit(1)
 
-    spoof_mac(new_mac)
+    choice = input("Press Enter for random MAC, or type custom: ").strip().lower()
+
+    if choice == "custom":
+        mac = input("Enter MAC (XX-XX-XX-XX-XX-XX): ").strip().upper()
+        if not valid_mac(mac):
+            print("Invalid MAC. Using random instead.")
+            mac = random_mac()
+    else:
+        mac = random_mac()
+
+    spoof_mac(mac)
+    input("\nPress Enter to exit...")
 
 if __name__ == "__main__":
     main()
